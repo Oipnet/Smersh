@@ -56,15 +56,17 @@ import { ImpactComponent } from './components/impact/impact.component';
 import { ImpactEditComponent } from './components/impact-edit/impact-edit.component';
 import { ImpactCreateComponent } from './components/impact-create/impact-create.component';
 import { ConclusionComponent } from './components/conclusion/conclusion.component';
-import {ClientsService} from "./services/clients.service";
+import { ClientsService } from './services/clients.service';
 import { ClientsComponent } from './components/clients/clients.component';
 import { ClientEditComponent } from './components/client-edit/client-edit.component';
 import { ClientCreateComponent } from './components/client-create/client-create.component';
-import {VulnTypesService} from "./services/vuln-types.service";
+import { VulnTypesService } from './services/vuln-types.service';
+import { GenericListComponent } from 'src/app/components/generic/list/generic-list.component';
 
 @NgModule({
   declarations: [
     AppComponent,
+    GenericListComponent,
     LoginComponent,
     MissionChoiceComponent,
     ErrorsComponent,
@@ -127,7 +129,7 @@ import {VulnTypesService} from "./services/vuln-types.service";
     UsersService,
     UploadsService,
     HostsService,
-      ClientsService,
+    ClientsService,
     MatDatepickerModule,
     TypesService,
   ],

@@ -23,9 +23,9 @@ import { ImpactComponent } from './components/impact/impact.component';
 import { ImpactEditComponent } from './components/impact-edit/impact-edit.component';
 import { ImpactCreateComponent } from './components/impact-create/impact-create.component';
 import { ConclusionComponent } from './components/conclusion/conclusion.component';
-import {ClientsComponent} from "./components/clients/clients.component";
-import {ClientEditComponent} from "./components/client-edit/client-edit.component";
-import {ClientCreateComponent} from "./components/client-create/client-create.component";
+import { ClientsComponent } from './components/clients/clients.component';
+import { ClientEditComponent } from './components/client-edit/client-edit.component';
+import { ClientCreateComponent } from './components/client-create/client-create.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
