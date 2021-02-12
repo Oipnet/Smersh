@@ -4,7 +4,8 @@ import { HostsService } from '../../services/hosts.service';
 import { MissionsService } from '../../services/missions.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
-import {Locale} from "../../storage/Locale";
+import { Locale } from '../../storage/Locale';
+import { MissionRouter } from 'src/app/router/MissionRouter';
 
 @Component({
   selector: 'app-add-vulns-to-host-external',
@@ -18,7 +19,6 @@ export class AddVulnsToHostExternalComponent implements OnInit {
   public selectedHosts = [];
   public selectedVulns = [];
   public idFromUrl: any;
-  public missionId: any;
   public host_id: any;
   selected_vulns: any[];
   selected_hosts: any[];
@@ -44,26 +44,26 @@ export class AddVulnsToHostExternalComponent implements OnInit {
   // get all vulns
   loadVulns(): void {
     this.vulnsService.getData().subscribe((vulns) => {
-     const locale =  new Locale().get();
-     this.vulns = vulns['hydra:member'].map(e => {
-       const elt = e.translations[locale];
-       return {
-         name:  elt.name,
-         value:  e['@id']
-       }
-     });
+      const locale = new Locale().get();
+      this.vulns = vulns['hydra:member'].map((e) => {
+        const elt = e.translations[locale];
+        return {
+          name: elt.name,
+          value: e['@id'],
+        };
+      });
     });
   }
 
   // get all hosts from mission id
   getHostsFromMission(mission_id): void {
     this.missionServices.getDataById(mission_id).subscribe((el) => {
-      this.hosts = el['hosts'];
+      this.hosts = el.hosts;
       console.log(this.hosts);
 
       const id_vulns = [];
-      for (const i in this.hosts[0]['vulns']) {
-        id_vulns.push(this.hosts[0]['vulns'][i]['@id']);
+      for (const i in this.hosts[0].vulns) {
+        id_vulns.push(this.hosts[0].vulns[i]['@id']);
       }
 
       const id_hosts = [];
@@ -74,17 +74,13 @@ export class AddVulnsToHostExternalComponent implements OnInit {
     });
   }
 
-  onSubmit(form: NgForm) {
-    console.log(this.host_id);
-    console.log('selectedVulns => ', this.selectedVulns);
+  onSubmit(form: NgForm): void {
     Object.assign(form.value, { vulns: this.selectedVulns });
-    this.hostsService.update(this.host_id, form.value).subscribe((el) => {
-      console.log('response from vuln service =>', el);
-      const id = el.mission;
-      const missionId = id.split('/').pop();
-      this.missionId = missionId;
+    this.hostsService.update(this.host_id, form.value).subscribe((host) => {
       this.ngOnInit();
-      this.router.navigateByUrl(`/missions/details/${this.missionId}`);
+      this.router.navigateByUrl(
+        MissionRouter.redirectToEditFromIRI(host.mission)
+      );
     });
   }
 

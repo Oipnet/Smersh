@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MissionsService } from '../../services/missions.service';
-import { FormBuilder, FormControl, FormGroup, NgForm, Validators, } from '@angular/forms';
+import { FormBuilder, FormGroup, NgForm } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
-import { switchMap } from 'rxjs/operators';
 import { UploadsService } from '../../services/uploads.service';
 import { HostsService } from '../../services/hosts.service';
 import { FileInformation } from '../../file-information';
@@ -21,7 +20,7 @@ function loadFile(url, callback) {
 @Component({
   selector: 'app-mission',
   templateUrl: './mission-single.component.html',
-  styleUrls: ['./mission-single.component.css']
+  styleUrls: ['./mission-single.component.css'],
 })
 export class MissionSingleComponent implements OnInit {
   @ViewChild('fileInput')
@@ -52,13 +51,12 @@ export class MissionSingleComponent implements OnInit {
     private router: Router,
     private missionsService: MissionsService,
     private uploadServices: UploadsService,
-    private fb: FormBuilder,
+    private fb: FormBuilder
   ) {
-    this.missionId =  this.router.url.split('/').pop();
-
+    this.missionId = this.router.url.split('/').pop();
   }
 
-  done(host) {
+  done(host): void {
     const idHost = host['@id'].split('/').pop();
     if (host.checked === false) {
       this.hostsService.update(idHost, { checked: true }).subscribe(() => {
@@ -75,21 +73,25 @@ export class MissionSingleComponent implements OnInit {
     }
   }
 
-  nmapUpdate(isChecked){
-    this.missionsService.update(this.missionId, { nmap : isChecked}).subscribe();
+  nmapUpdate(isChecked): void {
+    this.missionsService
+      .update(this.missionId, { nmap: isChecked })
+      .subscribe();
   }
 
-  nessusUpdate(isChecked){
-    this.missionsService.update(this.missionId, { nessus : isChecked}).subscribe();
+  nessusUpdate(isChecked) {
+    this.missionsService
+      .update(this.missionId, { nessus: isChecked })
+      .subscribe();
   }
 
-  openSnackBar(message) {
+  openSnackBar(message): void {
     this._snackBar.open(message, '', {
       duration: this.durationInSeconds * 1000,
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadData(this.missionId);
 
     this.uploadForm = this.fb.group({
@@ -98,20 +100,20 @@ export class MissionSingleComponent implements OnInit {
     });
   }
 
-  loadData(id) {
+  loadData(id: string): void {
     this.missionsService.getDataById(id).subscribe((response) => {
-
       this.mission = response;
       this.missionName = response.name;
       this.hosts = response['hosts'].map((host) => ({
         ...host,
-        vulns: host.vulns.map(vuln => ({ ...vuln, translate: vuln.translations[this.currentLocal] ?? {} })),
+        vulns: host.vulns.map((vuln) => ({
+          ...vuln,
+          translate: vuln.translations[this.currentLocal] ?? {},
+        })),
         name: `${host.name.match(/^((https?|ftp):\/\/)/) ? '' : 'http://'}${
           host.name
         }`,
-       // vulns: host.vulns.map(vuln => ({ ...vuln, translate: vuln.translation[this.currentLocal] })),
       }));
-      console.log(this.hosts);
       this.users = response['users'];
       this.creds = response['credentials'];
       this.clients = response['clients'];
@@ -124,8 +126,7 @@ export class MissionSingleComponent implements OnInit {
     });
   }
 
-  addCodiMd(form: NgForm) {
-    console.log('CODIMD FORM', form.value);
+  addCodiMd(form: NgForm): void {
     this.missionsService.update(this.id, form.value).subscribe(
       (el) => {
         console.log('RETOUR UPDATED', el);
@@ -140,7 +141,7 @@ export class MissionSingleComponent implements OnInit {
     );
   }
 
-  addHost(form: NgForm) {
+  addHost(form: NgForm): void {
     Object.assign(form.value, { checked: false });
     Object.assign(form.value, { mission: this.mission['@id'] });
     this.hostsService.insert(form.value).subscribe(
@@ -160,10 +161,9 @@ export class MissionSingleComponent implements OnInit {
     this.router.navigateByUrl(`/missions/details/${this.id}`);
   }
 
-  sendFile() {
+  sendFile(): void {
     const fd = new FormData();
     fd.append('filename', this.file);
-    console.log(this.file);
     fd.append('missionName', this.mission.name);
     this.uploadServices.uploadHosts(fd).then(
       () => this.router.navigateByUrl(`/missions/details/${this.id}`),
@@ -174,7 +174,7 @@ export class MissionSingleComponent implements OnInit {
     );
   }
 
-  onSelectFile(event) {
+  onSelectFile(event): void {
     this.file = event.target.files[0];
   }
 
@@ -192,7 +192,7 @@ export class MissionSingleComponent implements OnInit {
     filterValue = filterValue.toLowerCase();
   }
 
-  generate() {
+  generate(): void {
     loadFile(`/assets/Smersh.docx`, (error, content) => {
       if (error) {
         throw error;
@@ -201,12 +201,12 @@ export class MissionSingleComponent implements OnInit {
       const zip = new PizZip(content);
       const doc = new Docxtemplater().loadZip(zip);
       const locale = new Locale().get();
-      const hosts = this.hosts.map(host => ({
+      const hosts = this.hosts.map((host) => ({
         ...host,
-        vulns: host.vulns.map(vuln => ({
+        vulns: host.vulns.map((vuln) => ({
           ...vuln.translations[locale],
-          vulnName: vuln.translations[locale].name
-        }))
+          vulnName: vuln.translations[locale].name,
+        })),
       }));
       doc.setData({
         startDate: this.mission.startDate,
@@ -224,36 +224,17 @@ export class MissionSingleComponent implements OnInit {
         scope: hosts,
       });
 
-      console.log(this.mission);
-
       try {
         // render the document (replace all occurences of key by your data)
         doc.render();
       } catch (error) {
-        // The error thrown here contains additional information when logged with JSON.stringify (it contains a properties object containing all suberrors).
-        function replaceErrors(key, value) {
-          if (value instanceof Error) {
-            return Object.getOwnPropertyNames(value).reduce(function (
-              error,
-              key
-            ) {
-              error[key] = value[key];
-              return error;
-            },
-            {});
-          }
-          return value;
-        }
-
         if (error.properties && error.properties.errors instanceof Array) {
-          const errorMessages = error.properties.errors
-            .map(function (error) {
-              return error.properties.explanation;
-            })
-            .join('\n');
-          console.log('errorMessages', errorMessages);
-          // errorMessages is a humanly readable message looking like this :
-          // 'The tag beginning with "foobar" is unopened'
+          console.log(
+            'errorMessages',
+            error.properties.errors
+              .map((e) => e.properties.explanation)
+              .join('\n')
+          );
         }
         throw error;
       }
@@ -261,12 +242,12 @@ export class MissionSingleComponent implements OnInit {
         type: 'blob',
         mimeType:
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      }); //Output the document using Data-URI
+      }); // Output the document using Data-URI
       saveAs(out, 'rapport.docx');
     });
   }
 
-  share() {
+  share(): void {
     window.alert('The product has been shared!');
   }
 }
